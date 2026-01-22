@@ -2,13 +2,7 @@ import { Row } from '@umami/react-zen';
 import { Favicon } from '@/components/common/Favicon';
 import { FilterLink } from '@/components/common/FilterLink';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import {
-  useCountryNames,
-  useFormat,
-  useLocale,
-  useMessages,
-  useRegionNames,
-} from '@/components/hooks';
+import { useCountryNames, useFormat, useMessages, useRegionNames } from '@/components/hooks';
 import { GROUPED_DOMAINS } from '@/lib/constants';
 
 export interface MetricLabelProps {
@@ -20,9 +14,8 @@ export interface MetricLabelProps {
 export function MetricLabel({ type, data }: MetricLabelProps) {
   const { formatMessage, labels } = useMessages();
   const { formatValue, formatCity } = useFormat();
-  const { locale } = useLocale();
-  const { countryNames } = useCountryNames(locale);
-  const { getRegionName } = useRegionNames(locale);
+  const { countryNames } = useCountryNames();
+  const { getRegionName } = useRegionNames();
 
   const { label, country, domain } = data;
 

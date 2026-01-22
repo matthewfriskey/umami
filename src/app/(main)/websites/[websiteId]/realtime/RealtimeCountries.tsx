@@ -7,7 +7,7 @@ import { ListTable } from '@/components/metrics/ListTable';
 export function RealtimeCountries({ data }) {
   const { formatMessage, labels } = useMessages();
   const { locale } = useLocale();
-  const { countryNames } = useCountryNames(locale);
+  const { countryNames } = useCountryNames();
 
   const renderCountryName = useCallback(
     ({ label: code }) => (

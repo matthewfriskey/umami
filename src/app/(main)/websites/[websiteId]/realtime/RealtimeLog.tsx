@@ -38,7 +38,7 @@ export function RealtimeLog({ data }: { data: any }) {
   const { formatValue } = useFormat();
   const { locale } = useLocale();
   const { formatTimezoneDate } = useTimezone();
-  const { countryNames } = useCountryNames(locale);
+  const { countryNames } = useCountryNames();
   const [filter, setFilter] = useState(TYPE_ALL);
   const { updateParams } = useNavigation();
   const { isPhone } = useMobile();

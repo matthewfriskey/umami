@@ -18,8 +18,8 @@ export function useWebsiteValuesQuery({
 }) {
   const { get, useQuery } = useApi();
   const { locale } = useLocale();
-  const { countryNames } = useCountryNames(locale);
-  const { regionNames } = useRegionNames(locale);
+  const { countryNames } = useCountryNames();
+  const { regionNames } = useRegionNames();
 
   const names = {
     country: countryNames,

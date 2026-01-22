@@ -2,14 +2,13 @@ import { Column, Grid, Icon, Label, Row } from '@umami/react-zen';
 import type { ReactNode } from 'react';
 import { DateDistance } from '@/components/common/DateDistance';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useLocale, useMessages, useRegionNames } from '@/components/hooks';
+import { useFormat, useMessages, useRegionNames } from '@/components/hooks';
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
 
 export function SessionInfo({ data }) {
-  const { locale } = useLocale();
   const { formatMessage, labels } = useMessages();
   const { formatValue } = useFormat();
-  const { getRegionName } = useRegionNames(locale);
+  const { getRegionName } = useRegionNames();
 
   return (
     <Grid columns="repeat(auto-fit, minmax(200px, 1fr)" gap>

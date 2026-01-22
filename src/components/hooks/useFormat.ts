@@ -8,8 +8,8 @@ import { useMessages } from './useMessages';
 export function useFormat() {
   const { formatMessage, labels } = useMessages();
   const { locale } = useLocale();
-  const { countryNames } = useCountryNames(locale);
-  const { languageNames } = useLanguageNames(locale);
+  const { countryNames } = useCountryNames();
+  const { languageNames } = useLanguageNames();
 
   const formatOS = (value: string): string => {
     return OS_NAMES[value] || value;

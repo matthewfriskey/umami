@@ -1,8 +1,8 @@
 import regions from '../../../public/iso-3166-2.json';
 import { useCountryNames } from './useCountryNames';
 
-export function useRegionNames(locale: string) {
-  const { countryNames } = useCountryNames(locale);
+export function useRegionNames() {
+  const { countryNames } = useCountryNames();
 
   const getRegionName = (regionCode: string, countryCode?: string) => {
     if (!countryCode) {

@@ -24,7 +24,7 @@ export function WorldMap({ websiteId, data, ...props }: WorldMapProps) {
   const { colors } = getThemeColors(theme);
   const { locale } = useLocale();
   const { formatMessage, labels } = useMessages();
-  const { countryNames } = useCountryNames(locale);
+  const { countryNames } = useCountryNames();
   const visitorsLabel = formatMessage(labels.visitors).toLocaleLowerCase(locale);
   const unknownLabel = formatMessage(labels.unknown);
 

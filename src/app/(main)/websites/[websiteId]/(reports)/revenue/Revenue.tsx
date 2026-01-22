@@ -27,7 +27,7 @@ export function Revenue({ websiteId, startDate, endDate, unit }: RevenueProps) {
   const [currency, setCurrency] = useState('USD');
   const { formatMessage, labels } = useMessages();
   const { locale, dateLocale } = useLocale();
-  const { countryNames } = useCountryNames(locale);
+  const { countryNames } = useCountryNames();
   const { data, error, isLoading } = useResultQuery<any>('revenue', {
     websiteId,
     startDate,
