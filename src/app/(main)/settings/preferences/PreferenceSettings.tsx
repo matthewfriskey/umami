@@ -1,7 +1,6 @@
 import { Column, Label } from '@umami/react-zen';
 import { useLoginQuery, useMessages } from '@/components/hooks';
 import { DateRangeSetting } from './DateRangeSetting';
-import { LanguageSetting } from './LanguageSetting';
 import { ThemeSetting } from './ThemeSetting';
 import { TimezoneSetting } from './TimezoneSetting';
 
@@ -22,10 +21,6 @@ export function PreferenceSettings() {
       <Column>
         <Label>{formatMessage(labels.timezone)}</Label>
         <TimezoneSetting />
-      </Column>
-      <Column>
-        <Label>{formatMessage(labels.language)}</Label>
-        <LanguageSetting />
       </Column>
       <Column>
         <Label>{formatMessage(labels.theme)}</Label>

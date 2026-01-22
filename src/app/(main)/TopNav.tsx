@@ -1,5 +1,4 @@
 import { Row, ThemeButton } from '@umami/react-zen';
-import { LanguageButton } from '@/components/input/LanguageButton';
 import { ProfileButton } from '@/components/input/ProfileButton';
 
 export function TopNav() {
@@ -18,7 +17,6 @@ export function TopNav() {
     >
       <Row alignItems="center" justifyContent="flex-end" backgroundColor="2" borderRadius>
         <ThemeButton />
-        <LanguageButton />
         <ProfileButton />
       </Row>
     </Row>

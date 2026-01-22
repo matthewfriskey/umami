@@ -1,4 +1,3 @@
-export * from '@/app/(main)/settings/preferences/LanguageSetting';
 export * from '@/app/(main)/settings/preferences/PreferenceSettings';
 export * from '@/app/(main)/settings/preferences/PreferencesPage';
 export * from '@/app/(main)/settings/preferences/ThemeSetting';

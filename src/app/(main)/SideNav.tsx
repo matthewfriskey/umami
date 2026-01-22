@@ -11,7 +11,6 @@ import Link from 'next/link';
 import type { Key } from 'react';
 import { useGlobalState, useMessages, useNavigation } from '@/components/hooks';
 import { Globe, Grid2x2, LinkIcon, PanelLeft } from '@/components/icons';
-import { LanguageButton } from '@/components/input/LanguageButton';
 import { NavButton } from '@/components/input/NavButton';
 import { PanelButton } from '@/components/input/PanelButton';
 import { Logo } from '@/components/svg';
@@ -78,7 +77,6 @@ export function SideNav(props: SidebarProps) {
       </SidebarSection>
       <SidebarSection justifyContent="flex-start">
         <Row wrap="wrap">
-          <LanguageButton />
           <ThemeButton />
         </Row>
       </SidebarSection>
