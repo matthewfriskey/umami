@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAP_TYPES } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { getQueryFilters, parseRequest } from '@/lib/request';
 import { json, unauthorized } from '@/lib/response';
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     name: z.string().max(100),
     url: z.string().max(500),
     slug: z.string().max(100),
+    mapType: z.enum([MAP_TYPES.world, MAP_TYPES.usa]).optional(),
     teamId: z.string().nullable().optional(),
     id: z.uuid().nullable().optional(),
   });
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
     return error();
   }
 
-  const { id, name, url, slug, teamId } = body;
+  const { id, name, url, slug, teamId, mapType } = body;
 
   if ((teamId && !(await canCreateTeamWebsite(auth, teamId))) || !(await canCreateWebsite(auth))) {
     return unauthorized();
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
     name,
     url,
     slug,
+    mapType,
     teamId,
   };
 

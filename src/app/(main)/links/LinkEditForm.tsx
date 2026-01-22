@@ -7,15 +7,17 @@ import {
   Grid,
   Icon,
   Label,
+  ListItem,
   Loading,
   Row,
+  Select,
   TextField,
 } from '@umami/react-zen';
 import { useState } from 'react';
 import { useConfig, useLinkQuery, useMessages } from '@/components/hooks';
 import { useUpdateQuery } from '@/components/hooks/queries/useUpdateQuery';
 import { RefreshCw } from '@/components/icons';
-import { LINKS_URL } from '@/lib/constants';
+import { LINKS_URL, MAP_TYPES } from '@/lib/constants';
 import { getRandomChars } from '@/lib/generate';
 import { isValidUrl } from '@/lib/url';
 
@@ -74,11 +76,10 @@ export function LinkEditForm({
     <Form
       onSubmit={handleSubmit}
       error={getErrorMessage(error)}
-      defaultValues={{ slug: defaultSlug, ...data }}
+      defaultValues={{ slug: defaultSlug, ...data, mapType: data?.mapType || MAP_TYPES.world }}
     >
       {({ setValue, watch }) => {
         const slug = watch('slug');
-
         return (
           <>
             <FormField label={t(labels.name)} name="name" rules={{ required: t(labels.required) }}>
@@ -91,6 +92,13 @@ export function LinkEditForm({
               rules={{ required: t(labels.required), validate: checkUrl }}
             >
               <TextField placeholder="https://example.com" autoComplete="off" />
+            </FormField>
+
+            <FormField label={t(labels.mapType)} name="mapType">
+              <Select defaultValue={data?.mapType || MAP_TYPES.world}>
+                <ListItem id={MAP_TYPES.world}>{t(labels.worldMap)}</ListItem>
+                <ListItem id={MAP_TYPES.usa}>{t(labels.usaMap)}</ListItem>
+              </Select>
             </FormField>
 
             {cloudMode ? (

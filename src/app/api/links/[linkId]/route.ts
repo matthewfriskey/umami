@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAP_TYPES } from '@/lib/constants';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, serverError, unauthorized } from '@/lib/response';
 import { canDeleteLink, canUpdateLink, canViewLink } from '@/permissions';
@@ -27,6 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ lin
     name: z.string().optional(),
     url: z.string().optional(),
     slug: z.string().min(8).optional(),
+    mapType: z.enum([MAP_TYPES.world, MAP_TYPES.usa]).optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -36,14 +38,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ lin
   }
 
   const { linkId } = await params;
-  const { name, url, slug } = body;
+  const { name, url, slug, mapType } = body;
 
   if (!(await canUpdateLink(auth, linkId))) {
     return unauthorized();
   }
 
   try {
-    const result = await updateLink(linkId, { name, url, slug });
+    const result = await updateLink(linkId, { name, url, slug, mapType });
 
     return Response.json(result);
   } catch (e: any) {

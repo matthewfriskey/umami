@@ -4,9 +4,10 @@ import { firstBy } from 'thenby';
 import { GridRow } from '@/components/common/GridRow';
 import { PageBody } from '@/components/common/PageBody';
 import { Panel } from '@/components/common/Panel';
-import { useMobile, useRealtimeQuery } from '@/components/hooks';
+import { useMapType, useMobile, useRealtimeQuery } from '@/components/hooks';
+import { LocationMap } from '@/components/metrics/LocationMap';
 import { RealtimeChart } from '@/components/metrics/RealtimeChart';
-import { WorldMap } from '@/components/metrics/WorldMap';
+import { MAP_TYPES } from '@/lib/constants';
 import { percentFilter } from '@/lib/filters';
 import { RealtimeCountries } from './RealtimeCountries';
 import { RealtimeHeader } from './RealtimeHeader';
@@ -17,6 +18,7 @@ import { RealtimeReferrers } from './RealtimeReferrers';
 export function RealtimePage({ websiteId }: { websiteId: string }) {
   const { data, isLoading, error } = useRealtimeQuery(websiteId);
   const { isMobile } = useMobile();
+  const mapType = useMapType();
 
   if (isLoading || error) {
     return <PageBody isLoading={isLoading} error={error} />;
@@ -27,6 +29,13 @@ export function RealtimePage({ websiteId }: { websiteId: string }) {
       .map(key => ({ x: key, y: data.countries[key] }))
       .sort(firstBy('y', -1)),
   );
+  const regions = percentFilter(
+    Object.keys(data.regions || {})
+      .filter(key => key?.startsWith('US-'))
+      .map(key => ({ x: key, y: data.regions[key] }))
+      .sort(firstBy('y', -1)),
+  );
+  const mapData = mapType === MAP_TYPES.usa ? regions : countries;
 
   return (
     <Grid gap="3">
@@ -50,7 +59,7 @@ export function RealtimePage({ websiteId }: { websiteId: string }) {
           <RealtimeCountries data={countries} />
         </Panel>
         <Panel gridColumn={isMobile ? null : 'span 2'} padding="0">
-          <WorldMap data={countries} />
+          <LocationMap data={mapData} mapType={mapType} />
         </Panel>
       </GridRow>
     </Grid>

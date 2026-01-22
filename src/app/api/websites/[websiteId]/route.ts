@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ENTITY_TYPE } from '@/lib/constants';
+import { ENTITY_TYPE, MAP_TYPES, SHARE_ID_REGEX } from '@/lib/constants';
 import { uuid } from '@/lib/crypto';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, serverError, unauthorized } from '@/lib/response';
@@ -41,7 +41,8 @@ export async function POST(
   const schema = z.object({
     name: z.string().optional(),
     domain: z.string().optional(),
-    shareId: z.string().max(50).nullable().optional(),
+    shareId: z.string().regex(SHARE_ID_REGEX).nullable().optional(),
+    mapType: z.enum([MAP_TYPES.world, MAP_TYPES.usa]).optional(),
     replayEnabled: z.boolean().optional(),
     replayConfig: z
       .object({
@@ -61,7 +62,7 @@ export async function POST(
   }
 
   const { websiteId } = await params;
-  const { name, domain, shareId, replayEnabled, replayConfig } = body;
+  const { name, domain, shareId, mapType, replayEnabled, replayConfig } = body;
 
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
@@ -71,6 +72,7 @@ export async function POST(
     const website = await updateWebsite(websiteId, {
       name,
       domain,
+      mapType,
       ...(replayEnabled !== undefined && { replayEnabled }),
       ...(replayConfig !== undefined && { replayConfig }),
     });

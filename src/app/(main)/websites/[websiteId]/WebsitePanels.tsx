@@ -2,9 +2,9 @@ import { Grid, Heading, Row, Tab, TabList, TabPanel, Tabs } from '@umami/react-z
 import { GridRow } from '@/components/common/GridRow';
 import { Panel } from '@/components/common/Panel';
 import { useMessages, useMobile } from '@/components/hooks';
+import { LocationMap } from '@/components/metrics/LocationMap';
 import { MetricsTable } from '@/components/metrics/MetricsTable';
 import { WeeklyTraffic } from '@/components/metrics/WeeklyTraffic';
-import { WorldMap } from '@/components/metrics/WorldMap';
 
 export function WebsitePanels({ websiteId }: { websiteId: string }) {
   const { t, labels } = useMessages();
@@ -101,7 +101,7 @@ export function WebsitePanels({ websiteId }: { websiteId: string }) {
 
       <GridRow layout="two-one" {...rowProps}>
         <Panel paddingX="0" paddingY="0" style={{ gridColumn: isMobile ? 'span 1' : 'span 2' }}>
-          <WorldMap websiteId={websiteId} />
+          <LocationMap websiteId={websiteId} />
         </Panel>
 
         <Panel>
