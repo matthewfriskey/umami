@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SHARE_ID_REGEX } from '@/lib/constants';
+import { MAP_TYPES, SHARE_ID_REGEX } from '@/lib/constants';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, serverError, unauthorized } from '@/lib/response';
 import { canDeleteWebsite, canUpdateWebsite, canViewWebsite } from '@/permissions';
@@ -34,6 +34,7 @@ export async function POST(
     name: z.string().optional(),
     domain: z.string().optional(),
     shareId: z.string().regex(SHARE_ID_REGEX).nullable().optional(),
+    mapType: z.enum([MAP_TYPES.world, MAP_TYPES.usa]).optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -43,14 +44,14 @@ export async function POST(
   }
 
   const { websiteId } = await params;
-  const { name, domain, shareId } = body;
+  const { name, domain, shareId, mapType } = body;
 
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
   }
 
   try {
-    const website = await updateWebsite(websiteId, { name, domain, shareId });
+    const website = await updateWebsite(websiteId, { name, domain, shareId, mapType });
 
     return Response.json(website);
   } catch (e: any) {

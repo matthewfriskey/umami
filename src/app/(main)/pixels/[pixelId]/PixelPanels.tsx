@@ -2,8 +2,8 @@ import { Grid, Heading, Tab, TabList, TabPanel, Tabs } from '@umami/react-zen';
 import { GridRow } from '@/components/common/GridRow';
 import { Panel } from '@/components/common/Panel';
 import { useMessages } from '@/components/hooks';
+import { LocationMap } from '@/components/metrics/LocationMap';
 import { MetricsTable } from '@/components/metrics/MetricsTable';
-import { WorldMap } from '@/components/metrics/WorldMap';
 
 export function PixelPanels({ pixelId }: { pixelId: string }) {
   const { formatMessage, labels } = useMessages();
@@ -56,7 +56,7 @@ export function PixelPanels({ pixelId }: { pixelId: string }) {
       </GridRow>
       <GridRow layout="two" {...rowProps}>
         <Panel padding="0">
-          <WorldMap websiteId={pixelId} />
+          <LocationMap websiteId={pixelId} />
         </Panel>
         <Panel>
           <Heading size="2">{formatMessage(labels.location)}</Heading>

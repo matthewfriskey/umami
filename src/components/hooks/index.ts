@@ -72,6 +72,7 @@ export * from './useFormat';
 export * from './useGlobalState';
 export * from './useLanguageNames';
 export * from './useLocale';
+export * from './useMapType';
 export * from './useMessages';
 export * from './useMobile';
 export * from './useModified';

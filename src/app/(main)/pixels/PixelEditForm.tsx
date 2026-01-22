@@ -6,15 +6,17 @@ import {
   FormSubmitButton,
   Icon,
   Label,
+  ListItem,
   Loading,
   Row,
+  Select,
   TextField,
 } from '@umami/react-zen';
 import { useEffect, useState } from 'react';
 import { useConfig, useMessages, usePixelQuery } from '@/components/hooks';
 import { useUpdateQuery } from '@/components/hooks/queries/useUpdateQuery';
 import { RefreshCw } from '@/components/icons';
-import { PIXELS_URL } from '@/lib/constants';
+import { MAP_TYPES, PIXELS_URL } from '@/lib/constants';
 import { getRandomChars } from '@/lib/generate';
 
 const generateId = () => getRandomChars(9);
@@ -73,7 +75,11 @@ export function PixelEditForm({
   }
 
   return (
-    <Form onSubmit={handleSubmit} error={getErrorMessage(error)} defaultValues={{ slug, ...data }}>
+    <Form
+      onSubmit={handleSubmit}
+      error={getErrorMessage(error)}
+      defaultValues={{ slug, ...data, mapType: data?.mapType || MAP_TYPES.world }}
+    >
       {({ setValue }) => {
         return (
           <>
@@ -83,6 +89,13 @@ export function PixelEditForm({
               rules={{ required: formatMessage(labels.required) }}
             >
               <TextField autoComplete="off" />
+            </FormField>
+
+            <FormField label={formatMessage(labels.mapType)} name="mapType">
+              <Select defaultValue={data?.mapType || MAP_TYPES.world}>
+                <ListItem id={MAP_TYPES.world}>{formatMessage(labels.worldMap)}</ListItem>
+                <ListItem id={MAP_TYPES.usa}>{formatMessage(labels.usaMap)}</ListItem>
+              </Select>
             </FormField>
 
             <FormField

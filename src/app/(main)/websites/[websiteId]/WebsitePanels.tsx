@@ -3,9 +3,9 @@ import { GridRow } from '@/components/common/GridRow';
 import { Panel } from '@/components/common/Panel';
 import { useMessages, useNavigation } from '@/components/hooks';
 import { EventsChart } from '@/components/metrics/EventsChart';
+import { LocationMap } from '@/components/metrics/LocationMap';
 import { MetricsTable } from '@/components/metrics/MetricsTable';
 import { WeeklyTraffic } from '@/components/metrics/WeeklyTraffic';
-import { WorldMap } from '@/components/metrics/WorldMap';
 
 export function WebsitePanels({ websiteId }: { websiteId: string }) {
   const { formatMessage, labels } = useMessages();
@@ -107,7 +107,7 @@ export function WebsitePanels({ websiteId }: { websiteId: string }) {
 
       <GridRow layout="two-one" {...rowProps}>
         <Panel gridColumn={{ xs: 'span 1', md: 'span 2' }} paddingX="0" paddingY="0">
-          <WorldMap websiteId={websiteId} />
+          <LocationMap websiteId={websiteId} />
         </Panel>
 
         <Panel>

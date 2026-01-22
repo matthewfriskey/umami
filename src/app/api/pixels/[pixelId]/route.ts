@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAP_TYPES } from '@/lib/constants';
 import { parseRequest } from '@/lib/request';
 import { badRequest, json, ok, serverError, unauthorized } from '@/lib/response';
 import { canDeletePixel, canUpdatePixel, canViewPixel } from '@/permissions';
@@ -26,6 +27,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ pix
   const schema = z.object({
     name: z.string().optional(),
     slug: z.string().min(8).optional(),
+    mapType: z.enum([MAP_TYPES.world, MAP_TYPES.usa]).optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -35,14 +37,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ pix
   }
 
   const { pixelId } = await params;
-  const { name, slug } = body;
+  const { name, slug, mapType } = body;
 
   if (!(await canUpdatePixel(auth, pixelId))) {
     return unauthorized();
   }
 
   try {
-    const pixel = await updatePixel(pixelId, { name, slug });
+    const pixel = await updatePixel(pixelId, { name, slug, mapType });
 
     return Response.json(pixel);
   } catch (e: any) {

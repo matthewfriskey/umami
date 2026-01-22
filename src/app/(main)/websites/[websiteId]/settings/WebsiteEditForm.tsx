@@ -1,6 +1,14 @@
-import { Form, FormButtons, FormField, FormSubmitButton, TextField } from '@umami/react-zen';
+import {
+  Form,
+  FormButtons,
+  FormField,
+  FormSubmitButton,
+  ListItem,
+  Select,
+  TextField,
+} from '@umami/react-zen';
 import { useMessages, useUpdateQuery, useWebsite } from '@/components/hooks';
-import { DOMAIN_REGEX } from '@/lib/constants';
+import { DOMAIN_REGEX, MAP_TYPES } from '@/lib/constants';
 
 export function WebsiteEditForm({ websiteId, onSave }: { websiteId: string; onSave?: () => void }) {
   const website = useWebsite();
@@ -44,6 +52,12 @@ export function WebsiteEditForm({ websiteId, onSave }: { websiteId: string; onSa
         }}
       >
         <TextField />
+      </FormField>
+      <FormField label={formatMessage(labels.mapType)} name="mapType">
+        <Select defaultValue={website?.mapType || MAP_TYPES.world}>
+          <ListItem id={MAP_TYPES.world}>{formatMessage(labels.worldMap)}</ListItem>
+          <ListItem id={MAP_TYPES.usa}>{formatMessage(labels.usaMap)}</ListItem>
+        </Select>
       </FormField>
       <FormButtons>
         <FormSubmitButton data-test="button-submit" variant="primary">
