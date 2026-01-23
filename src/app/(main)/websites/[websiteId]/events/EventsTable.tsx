@@ -15,15 +15,35 @@ import { Avatar } from '@/components/common/Avatar';
 import { DateDistance } from '@/components/common/DateDistance';
 import { IconLabel } from '@/components/common/IconLabel';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useMessages, useNavigation } from '@/components/hooks';
+import {
+  useFormat,
+  useMapType,
+  useMessages,
+  useNavigation,
+  useRegionNames,
+} from '@/components/hooks';
 import { Eye, FileText } from '@/components/icons';
 import { EventData } from '@/components/metrics/EventData';
 import { Lightning } from '@/components/svg';
+import { MAP_TYPES } from '@/lib/constants';
 
 export function EventsTable(props: DataTableProps) {
   const { t, labels } = useMessages();
   const { updateParams } = useNavigation();
   const { formatValue } = useFormat();
+  const { regionNames } = useRegionNames();
+  const mapType = useMapType();
+  const getLocationName = (country: string, region: string) => {
+    if (mapType === MAP_TYPES.usa && country === 'US') {
+      const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+      const stateName = regionCode ? regionNames[regionCode] : null;
+      if (stateName) {
+        return stateName;
+      }
+    }
+
+    return formatValue(country, 'country');
+  };
 
   const renderLink = (label: string, hostname: string) => {
     return (
@@ -75,7 +95,7 @@ export function EventsTable(props: DataTableProps) {
       <DataColumn id="location" label={t(labels.location)}>
         {(row: any) => (
           <TypeIcon type="country" value={row.country}>
-            {row.city ? `${row.city}, ` : ''} {formatValue(row.country, 'country')}
+            {row.city ? `${row.city}, ` : ''} {getLocationName(row.country, row.region)}
           </TypeIcon>
         )}
       </DataColumn>

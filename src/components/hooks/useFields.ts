@@ -1,3 +1,5 @@
+import { MAP_TYPES } from '@/lib/constants';
+import { useMapType } from './useMapType';
 import { useMessages } from './useMessages';
 
 export type FieldGroup = 'url' | 'sources' | 'location' | 'environment' | 'utm' | 'other';
@@ -11,6 +13,8 @@ export interface Field {
 
 export function useFields() {
   const { t, labels } = useMessages();
+  const mapType = useMapType();
+  const regionLabel = mapType === MAP_TYPES.usa ? t(labels.state) : t(labels.region);
 
   const fields: Field[] = [
     {
@@ -45,8 +49,8 @@ export function useFields() {
     },
     {
       name: 'region',
-      filterLabel: t(labels.region),
-      label: t(labels.region),
+      filterLabel: regionLabel,
+      label: regionLabel,
       group: 'location',
     },
     {

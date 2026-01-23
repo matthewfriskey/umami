@@ -3,7 +3,8 @@ import Link from '@/components/common/Link';
 import { Avatar } from '@/components/common/Avatar';
 import { DateDistance } from '@/components/common/DateDistance';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useMessages } from '@/components/hooks';
+import { useFormat, useLocale, useMapType, useMessages, useRegionNames } from '@/components/hooks';
+import { MAP_TYPES } from '@/lib/constants';
 
 export function SessionsTable({
   websiteId,
@@ -12,6 +13,21 @@ export function SessionsTable({
 }: DataTableProps & { websiteId: string; getSessionHref?: (row: any) => string }) {
   const { t, labels } = useMessages();
   const { formatValue } = useFormat();
+  const { locale } = useLocale();
+  const { regionNames } = useRegionNames(locale);
+  const mapType = useMapType();
+  const locationLabel = mapType === MAP_TYPES.usa ? labels.state : labels.country;
+  const getLocationName = (country: string, region: string) => {
+    if (mapType === MAP_TYPES.usa && country === 'US') {
+      const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+      const stateName = regionCode ? regionNames[regionCode] : null;
+      if (stateName) {
+        return stateName;
+      }
+    }
+
+    return formatValue(country, 'country');
+  };
 
   return (
     <DataTable {...props}>
@@ -25,11 +41,11 @@ export function SessionsTable({
       <DataColumn id="visits" label={t(labels.visits)} width="80px" />
       <DataColumn id="views" label={t(labels.views)} width="80px" />
       <DataColumn id="events" label={t(labels.events)} width="80px" />
-      <DataColumn id="location" label={t(labels.location)}>
+      <DataColumn id="location" label={t(locationLabel)}>
         {(row: any) => (
           <TypeIcon type="country" value={row.country}>
             {row.city ? `${row.city}, ` : ''}
-            {formatValue(row.country, 'country')}
+            {getLocationName(row.country, row.region)}
           </TypeIcon>
         )}
       </DataColumn>

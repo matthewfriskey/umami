@@ -9,17 +9,19 @@ import { Empty } from '@/components/common/Empty';
 import { IconLabel } from '@/components/common/IconLabel';
 import {
   useCountryNames,
+  useMapType,
   useLocale,
   useMessages,
   useMobile,
   useNavigation,
+  useRegionNames,
   useTimezone,
   useWebsite,
 } from '@/components/hooks';
 import { Eye, User } from '@/components/icons';
 import { FilterButtons } from '@/components/input/FilterButtons';
 import { Lightning } from '@/components/svg';
-import { BROWSERS, OS_NAMES } from '@/lib/constants';
+import { BROWSERS, MAP_TYPES, OS_NAMES } from '@/lib/constants';
 
 const TYPE_ALL = 'all';
 const TYPE_PAGEVIEW = 'pageview';
@@ -40,6 +42,8 @@ export function RealtimeLog({ data }: { data: any }) {
   const { locale } = useLocale();
   const { formatTimezoneDate } = useTimezone();
   const { countryNames } = useCountryNames(locale);
+  const { regionNames } = useRegionNames(locale);
+  const mapType = useMapType();
   const [filter, setFilter] = useState(TYPE_ALL);
   const { updateParams } = useNavigation();
   const { isPhone } = useMobile();
@@ -74,10 +78,17 @@ export function RealtimeLog({ data }: { data: any }) {
     browser: string;
     os: string;
     country: string;
+    region: string;
     device: string;
     hostname: string;
   }) => {
-    const { __type, eventName, urlPath, browser, os, country, device, hostname } = log;
+    const { __type, eventName, urlPath, browser, os, country, region, device, hostname } = log;
+    const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+    const stateName = regionCode ? regionNames[regionCode] : null;
+    const locationName =
+      mapType === MAP_TYPES.usa && country === 'US' && stateName
+      ? stateName
+      : countryNames[country] || t(labels.unknown);
 
     if (__type === TYPE_EVENT) {
       return t.rich(messages.eventLog, {
@@ -112,7 +123,7 @@ export function RealtimeLog({ data }: { data: any }) {
 
     if (__type === TYPE_SESSION) {
       return t.rich(messages.visitorLog, {
-        country: countryNames[country] || t(labels.unknown),
+        country: locationName,
         browser: BROWSERS[browser],
         os: OS_NAMES[os] || os,
         device: t(labels[device] || labels.unknown),
@@ -150,13 +161,17 @@ export function RealtimeLog({ data }: { data: any }) {
     let logs = data.events;
 
     if (search) {
-      logs = logs.filter(({ eventName, urlPath, browser, os, country, device }) => {
+      logs = logs.filter(({ eventName, urlPath, browser, os, country, region, device }) => {
+        const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+        const stateName = regionCode ? regionNames[regionCode] : null;
         return [
           eventName,
           urlPath,
           os,
           formatValue(browser, 'browser'),
-          formatValue(country, 'country'),
+          mapType === MAP_TYPES.usa && country === 'US' && stateName
+            ? stateName
+            : formatValue(country, 'country'),
           formatValue(device, 'device'),
         ]
           .filter(n => n)
@@ -171,7 +186,7 @@ export function RealtimeLog({ data }: { data: any }) {
     }
 
     return logs;
-  }, [data, filter, formatValue, search]);
+  }, [data, filter, formatValue, mapType, regionNames, search]);
 
   return (
     <Column gap>

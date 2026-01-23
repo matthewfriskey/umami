@@ -2,14 +2,24 @@ import { Column, Grid, Icon, Label, Row } from '@umami/react-zen';
 import type { ReactNode } from 'react';
 import { DateDistance } from '@/components/common/DateDistance';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useLocale, useMessages, useRegionNames } from '@/components/hooks';
+import { useFormat, useLocale, useMapType, useMessages, useRegionNames } from '@/components/hooks';
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
+import { MAP_TYPES } from '@/lib/constants';
 
 export function SessionInfo({ data }) {
   const { locale } = useLocale();
   const { t, labels } = useMessages();
   const { formatValue } = useFormat();
-  const { getRegionName } = useRegionNames(locale);
+  const { getRegionName, regionNames } = useRegionNames(locale);
+  const mapType = useMapType();
+  const countryName = formatValue(data?.country, 'country');
+  const regionCode = data?.region
+    ? data?.region.includes('-')
+      ? data?.region
+      : `${data?.country || 'US'}-${data?.region}`
+    : null;
+  const stateName = regionCode ? regionNames[regionCode] : null;
+  const showState = mapType === MAP_TYPES.usa && data?.country === 'US' && !!stateName;
 
   return (
     <Grid columns="repeat(auto-fit, minmax(200px, 1fr)" gap>
@@ -25,13 +35,25 @@ export function SessionInfo({ data }) {
         <DateDistance date={new Date(data.firstAt)} />
       </Info>
 
-      <Info label={t(labels.country)} icon={<TypeIcon type="country" value={data?.country} />}>
-        {formatValue(data?.country, 'country')}
-      </Info>
-
-      <Info label={t(labels.region)} icon={<MapPin />}>
-        {getRegionName(data?.region)}
-      </Info>
+      {showState ? (
+        <>
+          <Info label={t(labels.state)} icon={<TypeIcon type="country" value={data?.country} />}>
+            {stateName}
+          </Info>
+          <Info label={t(labels.country)} icon={<TypeIcon type="country" value={data?.country} />}>
+            {countryName}
+          </Info>
+        </>
+      ) : (
+        <>
+          <Info label={t(labels.country)} icon={<TypeIcon type="country" value={data?.country} />}>
+            {countryName}
+          </Info>
+          <Info label={t(labels.region)} icon={<MapPin />}>
+            {getRegionName(data?.region, data?.country)}
+          </Info>
+        </>
+      )}
 
       <Info label={t(labels.city)} icon={<Landmark />}>
         {data?.city}
