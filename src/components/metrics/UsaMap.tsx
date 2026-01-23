@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { useLocale, useMessages, useRegionNames, useWebsiteMetricsQuery } from '@/components/hooks';
 import { getThemeColors } from '@/lib/colors';
-import { MAP_USA_FILE, US_STATE_FIPS_TO_ABBR } from '@/lib/constants';
+import { MAP_USA_FILE, US_STATE_CODES, US_STATE_FIPS_TO_ABBR } from '@/lib/constants';
 import { percentFilter } from '@/lib/filters';
 import { formatLongNumber } from '@/lib/format';
 
@@ -27,10 +27,7 @@ export function UsaMap({ websiteId, data, ...props }: UsaMapProps) {
     type: 'region',
   });
 
-  const stateCodes = useMemo(
-    () => new Set(Object.values(US_STATE_FIPS_TO_ABBR).map(code => `US-${code}`)),
-    [],
-  );
+  const stateCodes = useMemo(() => new Set(US_STATE_CODES), []);
 
   const metrics = useMemo(() => {
     const source = (data || mapData) as any[] | undefined;

@@ -101,6 +101,8 @@ export const labels = defineMessages({
   os: { id: 'label.os', defaultMessage: 'OS' },
   devices: { id: 'label.devices', defaultMessage: 'Devices' },
   countries: { id: 'label.countries', defaultMessage: 'Countries' },
+  states: { id: 'label.states', defaultMessage: 'States' },
+  outsideUsa: { id: 'label.outside-usa', defaultMessage: 'Outside USA' },
   mapType: { id: 'label.map-type', defaultMessage: 'Map type' },
   worldMap: { id: 'label.world-map', defaultMessage: 'World map' },
   usaMap: { id: 'label.usa-map', defaultMessage: 'USA map' },

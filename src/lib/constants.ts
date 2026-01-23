@@ -417,6 +417,8 @@ export const US_STATE_FIPS_TO_ABBR: Record<string, string> = {
   '56': 'WY',
 };
 
+export const US_STATE_CODES = Object.values(US_STATE_FIPS_TO_ABBR).map(code => `US-${code}`);
+
 export const ISO_COUNTRIES = {
   ABW: 'AW',
   AFG: 'AF',
