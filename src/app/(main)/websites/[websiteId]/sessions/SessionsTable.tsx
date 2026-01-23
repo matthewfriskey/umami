@@ -3,12 +3,33 @@ import Link from 'next/link';
 import { Avatar } from '@/components/common/Avatar';
 import { DateDistance } from '@/components/common/DateDistance';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useMessages, useNavigation } from '@/components/hooks';
+import {
+  useFormat,
+  useMapType,
+  useMessages,
+  useNavigation,
+  useRegionNames,
+} from '@/components/hooks';
+import { MAP_TYPES } from '@/lib/constants';
 
 export function SessionsTable(props: DataTableProps) {
   const { formatMessage, labels } = useMessages();
   const { formatValue } = useFormat();
+  const { regionNames } = useRegionNames();
+  const mapType = useMapType();
   const { updateParams } = useNavigation();
+  const locationLabel = mapType === MAP_TYPES.usa ? labels.state : labels.country;
+  const getLocationName = (country: string, region: string) => {
+    if (mapType === MAP_TYPES.usa && country === 'US') {
+      const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+      const stateName = regionCode ? regionNames[regionCode] : null;
+      if (stateName) {
+        return stateName;
+      }
+    }
+
+    return formatValue(country, 'country');
+  };
 
   return (
     <DataTable {...props}>
@@ -21,10 +42,10 @@ export function SessionsTable(props: DataTableProps) {
       </DataColumn>
       <DataColumn id="visits" label={formatMessage(labels.visits)} width="80px" />
       <DataColumn id="views" label={formatMessage(labels.views)} width="80px" />
-      <DataColumn id="country" label={formatMessage(labels.country)}>
+      <DataColumn id="country" label={formatMessage(locationLabel)}>
         {(row: any) => (
           <TypeIcon type="country" value={row.country}>
-            {formatValue(row.country, 'country')}
+            {getLocationName(row.country, row.region)}
           </TypeIcon>
         )}
       </DataColumn>

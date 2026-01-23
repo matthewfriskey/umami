@@ -8,17 +8,18 @@ import { Avatar } from '@/components/common/Avatar';
 import { Empty } from '@/components/common/Empty';
 import {
   useCountryNames,
-  useLocale,
+  useMapType,
   useMessages,
   useMobile,
   useNavigation,
+  useRegionNames,
   useTimezone,
   useWebsite,
 } from '@/components/hooks';
 import { Eye, User } from '@/components/icons';
 import { FilterButtons } from '@/components/input/FilterButtons';
 import { Lightning } from '@/components/svg';
-import { BROWSERS, OS_NAMES } from '@/lib/constants';
+import { BROWSERS, MAP_TYPES, OS_NAMES } from '@/lib/constants';
 
 const TYPE_ALL = 'all';
 const TYPE_PAGEVIEW = 'pageview';
@@ -36,9 +37,10 @@ export function RealtimeLog({ data }: { data: any }) {
   const [search, setSearch] = useState('');
   const { formatMessage, labels, messages, FormattedMessage } = useMessages();
   const { formatValue } = useFormat();
-  const { locale } = useLocale();
   const { formatTimezoneDate } = useTimezone();
   const { countryNames } = useCountryNames();
+  const { regionNames } = useRegionNames();
+  const mapType = useMapType();
   const [filter, setFilter] = useState(TYPE_ALL);
   const { updateParams } = useNavigation();
   const { isPhone } = useMobile();
@@ -73,9 +75,16 @@ export function RealtimeLog({ data }: { data: any }) {
     browser: string;
     os: string;
     country: string;
+    region: string;
     device: string;
   }) => {
-    const { __type, eventName, urlPath, browser, os, country, device } = log;
+    const { __type, eventName, urlPath, browser, os, country, region, device } = log;
+    const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+    const stateName = regionCode ? regionNames[regionCode] : null;
+    const showState = mapType === MAP_TYPES.usa && country === 'US' && stateName;
+    const locationName = showState
+      ? stateName
+      : countryNames[country] || formatMessage(labels.unknown);
 
     if (__type === TYPE_EVENT) {
       return (
@@ -111,7 +120,7 @@ export function RealtimeLog({ data }: { data: any }) {
         <FormattedMessage
           {...messages.visitorLog}
           values={{
-            country: <b key="country">{countryNames[country] || formatMessage(labels.unknown)}</b>,
+            country: <b key="country">{locationName}</b>,
             browser: <b key="browser">{BROWSERS[browser]}</b>,
             os: <b key="os">{OS_NAMES[os] || os}</b>,
             device: <b key="device">{formatMessage(labels[device] || labels.unknown)}</b>,
@@ -150,13 +159,17 @@ export function RealtimeLog({ data }: { data: any }) {
     let logs = data.events;
 
     if (search) {
-      logs = logs.filter(({ eventName, urlPath, browser, os, country, device }) => {
+      logs = logs.filter(({ eventName, urlPath, browser, os, country, region, device }) => {
+        const regionCode = region?.includes('-') ? region : region ? `US-${region}` : null;
+        const stateName = regionCode ? regionNames[regionCode] : null;
         return [
           eventName,
           urlPath,
           os,
           formatValue(browser, 'browser'),
-          formatValue(country, 'country'),
+          mapType === MAP_TYPES.usa && country === 'US' && stateName
+            ? stateName
+            : formatValue(country, 'country'),
           formatValue(device, 'device'),
         ]
           .filter(n => n)
@@ -171,7 +184,7 @@ export function RealtimeLog({ data }: { data: any }) {
     }
 
     return logs;
-  }, [data, filter, formatValue, search]);
+  }, [data, filter, formatValue, mapType, regionNames, search]);
 
   return (
     <Column gap>

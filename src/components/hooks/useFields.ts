@@ -1,7 +1,12 @@
+import { MAP_TYPES } from '@/lib/constants';
+import { useMapType } from './useMapType';
 import { useMessages } from './useMessages';
 
 export function useFields() {
   const { formatMessage, labels } = useMessages();
+  const mapType = useMapType();
+  const regionLabel =
+    mapType === MAP_TYPES.usa ? formatMessage(labels.state) : formatMessage(labels.region);
 
   const fields = [
     { name: 'path', type: 'string', label: formatMessage(labels.path) },
@@ -12,7 +17,7 @@ export function useFields() {
     { name: 'os', type: 'string', label: formatMessage(labels.os) },
     { name: 'device', type: 'string', label: formatMessage(labels.device) },
     { name: 'country', type: 'string', label: formatMessage(labels.country) },
-    { name: 'region', type: 'string', label: formatMessage(labels.region) },
+    { name: 'region', type: 'string', label: regionLabel },
     { name: 'city', type: 'string', label: formatMessage(labels.city) },
     { name: 'hostname', type: 'string', label: formatMessage(labels.hostname) },
     { name: 'tag', type: 'string', label: formatMessage(labels.tag) },
