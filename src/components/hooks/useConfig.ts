@@ -4,6 +4,7 @@ import { setConfig, useApp } from '@/store/app';
 
 export type Config = {
   cloudMode: boolean;
+  exportDisabled: boolean;
   faviconUrl?: string;
   linksUrl?: string;
   pixelsUrl?: string;

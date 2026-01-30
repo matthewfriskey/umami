@@ -2,7 +2,7 @@ import JSZip from 'jszip';
 import Papa from 'papaparse';
 import { z } from 'zod';
 import { getQueryFilters, parseRequest } from '@/lib/request';
-import { json, unauthorized } from '@/lib/response';
+import { forbidden, json, unauthorized } from '@/lib/response';
 import { dateRangeParams, pagingParams } from '@/lib/schema';
 import { canViewWebsite } from '@/permissions';
 import { getEventMetrics, getPageviewMetrics, getSessionMetrics } from '@/queries/sql';
@@ -26,6 +26,10 @@ export async function GET(
 
   if (!(await canViewWebsite(auth, websiteId))) {
     return unauthorized();
+  }
+
+  if (process.env.DISABLE_EXPORT !== 'false') {
+    return forbidden({ message: 'Export is disabled.' });
   }
 
   const filters = await getQueryFilters(query, websiteId);

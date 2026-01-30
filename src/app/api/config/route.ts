@@ -8,8 +8,11 @@ export async function GET(request: Request) {
     return error();
   }
 
+  const exportDisabled = process.env.DISABLE_EXPORT !== 'false';
+
   return json({
     cloudMode: !!process.env.CLOUD_MODE,
+    exportDisabled,
     faviconUrl: process.env.FAVICON_URL,
     linksUrl: process.env.LINKS_URL,
     pixelsUrl: process.env.PIXELS_URL,

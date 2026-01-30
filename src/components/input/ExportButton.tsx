@@ -1,7 +1,7 @@
 import { Icon, LoadingButton, Tooltip, TooltipTrigger } from '@umami/react-zen';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { useApi, useMessages } from '@/components/hooks';
+import { useApi, useConfig, useMessages } from '@/components/hooks';
 import { useDateParameters } from '@/components/hooks/useDateParameters';
 import { useFilterParameters } from '@/components/hooks/useFilterParameters';
 import { Download } from '@/components/icons';
@@ -12,7 +12,12 @@ export function ExportButton({ websiteId }: { websiteId: string }) {
   const date = useDateParameters();
   const filters = useFilterParameters();
   const searchParams = useSearchParams();
+  const config = useConfig();
   const { get } = useApi();
+
+  if (config?.exportDisabled) {
+    return null;
+  }
 
   const handleClick = async () => {
     setIsLoading(true);
