@@ -48,6 +48,7 @@ async function relationalQuery(
     },
   );
   const includeCountry = column === 'city' || column === 'region';
+  const includeRegion = column === 'city';
 
   if (type === 'language') {
     column = `lower(left(${type}, 2))`;
@@ -58,6 +59,7 @@ async function relationalQuery(
     select
       name,
       ${includeCountry ? 'country,' : ''}
+      ${includeRegion ? 'region,' : ''}
       sum(t.c) as "pageviews",
       count(distinct t.session_id) as "visitors",
       count(distinct t.visit_id) as "visits",
@@ -67,6 +69,7 @@ async function relationalQuery(
       select
         ${column} name,
         ${includeCountry ? 'country,' : ''}
+        ${includeRegion ? 'region,' : ''}
         website_event.session_id,
         website_event.visit_id,
         count(*) as "c",
@@ -81,9 +84,11 @@ async function relationalQuery(
         ${filterQuery}
       group by name, website_event.session_id, website_event.visit_id
       ${includeCountry ? ', country' : ''}
+      ${includeRegion ? ', region' : ''}
     ) as t
     group by name 
     ${includeCountry ? ', country' : ''}
+    ${includeRegion ? ', region' : ''}
     order by visitors desc, visits desc
     limit ${limit}
     offset ${offset}
@@ -106,6 +111,7 @@ async function clickhouseQuery(
     websiteId,
   });
   const includeCountry = column === 'city' || column === 'region';
+  const includeRegion = column === 'city';
 
   if (type === 'language') {
     column = `lower(left(${type}, 2))`;
@@ -116,6 +122,7 @@ async function clickhouseQuery(
     select
       name,
       ${includeCountry ? 'country,' : ''}
+      ${includeRegion ? 'region,' : ''}
       sum(t.c) as "pageviews",
       uniq(t.session_id) as "visitors",
       uniq(t.visit_id) as "visits",
@@ -125,6 +132,7 @@ async function clickhouseQuery(
       select
         ${column} name,
         ${includeCountry ? 'country,' : ''}
+        ${includeRegion ? 'region,' : ''}
         session_id,
         visit_id,
         count(*) c,
@@ -139,9 +147,11 @@ async function clickhouseQuery(
         ${filterQuery}
       group by name, session_id, visit_id
       ${includeCountry ? ', country' : ''}
+      ${includeRegion ? ', region' : ''}
     ) as t
     group by name 
     ${includeCountry ? ', country' : ''}
+    ${includeRegion ? ', region' : ''}
     order by visitors desc, visits desc
     limit ${limit}
     offset ${offset}

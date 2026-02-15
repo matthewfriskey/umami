@@ -30,7 +30,7 @@ import { MAP_TYPES } from '@/lib/constants';
 export function EventsTable(props: DataTableProps) {
   const { formatMessage, labels } = useMessages();
   const { updateParams } = useNavigation();
-  const { formatValue } = useFormat();
+  const { formatCity, formatValue } = useFormat();
   const { regionNames } = useRegionNames();
   const mapType = useMapType();
   const getLocationName = (country: string, region: string) => {
@@ -82,7 +82,9 @@ export function EventsTable(props: DataTableProps) {
       <DataColumn id="location" label={formatMessage(labels.location)}>
         {(row: any) => (
           <TypeIcon type="country" value={row.country}>
-            {row.city ? `${row.city}, ` : ''} {getLocationName(row.country, row.region)}
+            {row.city
+              ? formatCity(row.city, row.country, row.region)
+              : getLocationName(row.country, row.region)}
           </TypeIcon>
         )}
       </DataColumn>
