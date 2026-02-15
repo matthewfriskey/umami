@@ -19,7 +19,7 @@ export function UsaMap({ websiteId, data, ...props }: UsaMapProps) {
   const { colors } = getThemeColors(theme);
   const { locale } = useLocale();
   const { t, labels } = useMessages();
-  const { regionNames } = useRegionNames();
+  const { regionNames } = useRegionNames(locale);
   const visitorsLabel = t(labels.visitors).toLocaleLowerCase(locale);
   const unknownLabel = t(labels.unknown);
 

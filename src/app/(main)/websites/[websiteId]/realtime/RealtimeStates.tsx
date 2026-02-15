@@ -1,12 +1,13 @@
 import { useCallback } from 'react';
-import { useMessages, useRegionNames } from '@/components/hooks';
+import { useLocale, useMessages, useRegionNames } from '@/components/hooks';
 import { ListTable } from '@/components/metrics/ListTable';
 
 const OUTSIDE_USA_KEY = '__outside__';
 
 export function RealtimeStates({ data }) {
+  const { locale } = useLocale();
   const { t, labels } = useMessages();
-  const { regionNames } = useRegionNames();
+  const { regionNames } = useRegionNames(locale);
 
   const renderStateName = useCallback(
     ({ label: code }) => {

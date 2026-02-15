@@ -9,7 +9,7 @@ import { MAP_TYPES } from '@/lib/constants';
 export function SessionInfo({ data }) {
   const { locale } = useLocale();
   const { t, labels } = useMessages();
-  const { formatValue } = useFormat();
+  const { formatCity, formatValue } = useFormat();
   const { getRegionName, regionNames } = useRegionNames(locale);
   const mapType = useMapType();
   const countryName = formatValue(data?.country, 'country');
@@ -56,7 +56,7 @@ export function SessionInfo({ data }) {
       )}
 
       <Info label={t(labels.city)} icon={<Landmark />}>
-        {data?.city}
+        {data?.city ? formatCity(data.city, data.country, data.region) : null}
       </Info>
 
       <Info label={t(labels.browser)} icon={<TypeIcon type="browser" value={data?.browser} />}>

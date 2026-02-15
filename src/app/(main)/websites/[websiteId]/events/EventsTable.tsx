@@ -17,6 +17,7 @@ import { IconLabel } from '@/components/common/IconLabel';
 import { TypeIcon } from '@/components/common/TypeIcon';
 import {
   useFormat,
+  useLocale,
   useMapType,
   useMessages,
   useNavigation,
@@ -30,8 +31,9 @@ import { MAP_TYPES } from '@/lib/constants';
 export function EventsTable(props: DataTableProps) {
   const { t, labels } = useMessages();
   const { updateParams } = useNavigation();
-  const { formatValue } = useFormat();
-  const { regionNames } = useRegionNames();
+  const { locale } = useLocale();
+  const { formatCity, formatValue } = useFormat();
+  const { regionNames } = useRegionNames(locale);
   const mapType = useMapType();
   const getLocationName = (country: string, region: string) => {
     if (mapType === MAP_TYPES.usa && country === 'US') {
@@ -95,7 +97,9 @@ export function EventsTable(props: DataTableProps) {
       <DataColumn id="location" label={t(labels.location)}>
         {(row: any) => (
           <TypeIcon type="country" value={row.country}>
-            {row.city ? `${row.city}, ` : ''} {getLocationName(row.country, row.region)}
+            {row.city
+              ? formatCity(row.city, row.country, row.region)
+              : getLocationName(row.country, row.region)}
           </TypeIcon>
         )}
       </DataColumn>
