@@ -8,7 +8,7 @@ import { MAP_TYPES } from '@/lib/constants';
 
 export function SessionInfo({ data }) {
   const { formatMessage, labels } = useMessages();
-  const { formatValue } = useFormat();
+  const { formatCity, formatValue } = useFormat();
   const { getRegionName, regionNames } = useRegionNames();
   const mapType = useMapType();
   const countryName = formatValue(data?.country, 'country');
@@ -64,7 +64,7 @@ export function SessionInfo({ data }) {
       )}
 
       <Info label={formatMessage(labels.city)} icon={<Landmark />}>
-        {data?.city}
+        {data?.city ? formatCity(data.city, data.country, data.region) : null}
       </Info>
 
       <Info

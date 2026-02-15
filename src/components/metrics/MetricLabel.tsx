@@ -17,7 +17,7 @@ export function MetricLabel({ type, data }: MetricLabelProps) {
   const { countryNames } = useCountryNames();
   const { getRegionName } = useRegionNames();
 
-  const { label, country, domain } = data;
+  const { label, country, region, domain } = data;
 
   switch (type) {
     case 'browser':
@@ -39,7 +39,7 @@ export function MetricLabel({ type, data }: MetricLabelProps) {
         <FilterLink
           type="city"
           value={label}
-          label={formatCity(label, country)}
+          label={formatCity(label, country, region)}
           icon={
             country && (
               <img

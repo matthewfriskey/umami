@@ -39,6 +39,7 @@ async function relationalQuery(
     },
   );
   const includeCountry = column === 'city' || column === 'region';
+  const includeRegion = column === 'city';
 
   if (type === 'language') {
     column = `lower(left(${type}, 2))`;
@@ -50,6 +51,7 @@ async function relationalQuery(
       ${column} x,
       count(distinct website_event.session_id) y
       ${includeCountry ? ', country' : ''}
+      ${includeRegion ? ', region' : ''}
     from website_event
     ${cohortQuery}
     ${joinSessionQuery}
@@ -59,6 +61,7 @@ async function relationalQuery(
     ${filterQuery}
     group by 1 
     ${includeCountry ? ', 3' : ''}
+    ${includeRegion ? ', 4' : ''}
     order by 2 desc
     limit ${limit}
     offset ${offset}
@@ -81,6 +84,7 @@ async function clickhouseQuery(
     websiteId,
   });
   const includeCountry = column === 'city' || column === 'region';
+  const includeRegion = column === 'city';
 
   if (type === 'language') {
     column = `lower(left(${type}, 2))`;
@@ -94,6 +98,7 @@ async function clickhouseQuery(
       ${column} x,
       count(distinct session_id) y
       ${includeCountry ? ', country' : ''}
+      ${includeRegion ? ', region' : ''}
     from website_event
     ${cohortQuery}
     where website_id = {websiteId:UUID}
@@ -102,6 +107,7 @@ async function clickhouseQuery(
       ${filterQuery}
     group by x 
     ${includeCountry ? ', country' : ''}
+    ${includeRegion ? ', region' : ''}
     order by y desc
     limit ${limit}
     offset ${offset}
@@ -112,6 +118,7 @@ async function clickhouseQuery(
       ${column} x,
       uniq(session_id) y
       ${includeCountry ? ', country' : ''}
+      ${includeRegion ? ', region' : ''}
     from website_event_stats_hourly as website_event
     ${cohortQuery}
     where website_id = {websiteId:UUID}
@@ -120,6 +127,7 @@ async function clickhouseQuery(
       ${filterQuery}
     group by x 
     ${includeCountry ? ', country' : ''}
+    ${includeRegion ? ', region' : ''}
     order by y desc
     limit ${limit}
     offset ${offset}
