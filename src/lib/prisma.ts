@@ -135,6 +135,31 @@ function getCohortQuery(filters: QueryFilters = {}) {
     `;
 }
 
+function getIgnoredDistinctIdsQuery(filters: Record<string, any>) {
+  const values = filters?.ignoredDistinctIds as string[];
+
+  if (!values?.length) {
+    return '';
+  }
+
+  const params = values.map((_, i) => `{{ignoredDistinctId${i}}}`).join(', ');
+
+  return `and coalesce(session.distinct_id, '') not in (${params})`;
+}
+
+function getIgnoredDistinctIdsParams(filters: Record<string, any>) {
+  const values = filters?.ignoredDistinctIds as string[];
+
+  if (!values?.length) {
+    return {};
+  }
+
+  return values.reduce((obj, value, i) => {
+    obj[`ignoredDistinctId${i}`] = value;
+    return obj;
+  }, {});
+}
+
 function getDateQuery(filters: Record<string, any>) {
   const { startDate, endDate } = filters;
 
@@ -166,6 +191,7 @@ function parseFilters(filters: Record<string, any>, options?: QueryOptions) {
   const joinSession = Object.keys(filters).find(key =>
     ['referrer', ...SESSION_COLUMNS].includes(key),
   );
+  const ignoreDistinctIdsQuery = getIgnoredDistinctIdsQuery(filters);
 
   const cohortFilters = Object.fromEntries(
     Object.entries(filters).filter(([key]) => key.startsWith('cohort_')),
@@ -173,12 +199,14 @@ function parseFilters(filters: Record<string, any>, options?: QueryOptions) {
 
   return {
     joinSessionQuery:
-      options?.joinSession || joinSession
+      options?.joinSession || joinSession || ignoreDistinctIdsQuery
         ? `inner join session on website_event.session_id = session.session_id and website_event.website_id = session.website_id`
         : '',
     dateQuery: getDateQuery(filters),
-    filterQuery: getFilterQuery(filters, options),
-    queryParams: getQueryParams(filters),
+    filterQuery: [getFilterQuery(filters, options), ignoreDistinctIdsQuery]
+      .filter(Boolean)
+      .join('\n'),
+    queryParams: { ...getQueryParams(filters), ...getIgnoredDistinctIdsParams(filters) },
     cohortQuery: getCohortQuery(cohortFilters),
   };
 }

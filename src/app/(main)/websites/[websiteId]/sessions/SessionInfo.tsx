@@ -1,13 +1,29 @@
-import { Column, Grid, Icon, Label, Row } from '@umami/react-zen';
+import { Button, Column, Grid, Icon, Label, Row } from '@umami/react-zen';
 import type { ReactNode } from 'react';
 import { DateDistance } from '@/components/common/DateDistance';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useMapType, useMessages, useRegionNames } from '@/components/hooks';
+import {
+  useFormat,
+  useMapType,
+  useMessages,
+  useRegionNames,
+  useUpdateQuery,
+  useWebsite,
+} from '@/components/hooks';
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
 import { MAP_TYPES } from '@/lib/constants';
 
-export function SessionInfo({ data }) {
-  const { formatMessage, labels } = useMessages();
+function getDistinctIds(value: string = '') {
+  return value
+    .split(',')
+    .map(n => n.trim())
+    .filter(Boolean);
+}
+
+export function SessionInfo({ data, websiteId }: { data: any; websiteId: string }) {
+  const website = useWebsite();
+  const { mutateAsync, isPending, touch, toast } = useUpdateQuery(`/websites/${websiteId}`);
+  const { formatMessage, labels, messages } = useMessages();
   const { formatCity, formatValue } = useFormat();
   const { getRegionName, regionNames } = useRegionNames();
   const mapType = useMapType();
@@ -19,11 +35,46 @@ export function SessionInfo({ data }) {
     : null;
   const stateName = regionCode ? regionNames[regionCode] : null;
   const showState = mapType === MAP_TYPES.usa && data?.country === 'US' && !!stateName;
+  const distinctId = data?.distinctId;
+  const ignoredDistinctIds = getDistinctIds(website?.ignoreDistinctIds);
+  const isWhitelisted = distinctId && ignoredDistinctIds.includes(distinctId);
+
+  const handleToggleWhitelist = async () => {
+    if (!distinctId) return;
+
+    const next = isWhitelisted
+      ? ignoredDistinctIds.filter(id => id !== distinctId)
+      : [...ignoredDistinctIds, distinctId];
+
+    await mutateAsync(
+      { ignoreDistinctIds: next.join(', ') },
+      {
+        onSuccess: () => {
+          touch(`website:${websiteId}`);
+          toast(formatMessage(messages.saved));
+        },
+      },
+    );
+  };
 
   return (
     <Grid columns="repeat(auto-fit, minmax(200px, 1fr)" gap>
       <Info label={formatMessage(labels.distinctId)} icon={<KeyRound />}>
-        {data?.distinctId}
+        <Row alignItems="center" gap>
+          {data?.distinctId}
+          {distinctId && (
+            <Button
+              size="small"
+              variant={isWhitelisted ? 'secondary' : 'primary'}
+              onPress={handleToggleWhitelist}
+              isDisabled={isPending}
+            >
+              {isWhitelisted
+                ? formatMessage(labels.removeWhitelist)
+                : formatMessage(labels.addWhitelist)}
+            </Button>
+          )}
+        </Row>
       </Info>
 
       <Info label={formatMessage(labels.lastSeen)} icon={<Calendar />}>

@@ -128,6 +128,8 @@ export const labels = defineMessages({
   views: { id: 'label.views', defaultMessage: 'Views' },
   none: { id: 'label.none', defaultMessage: 'None' },
   clearAll: { id: 'label.clear-all', defaultMessage: 'Clear all' },
+  addWhitelist: { id: 'label.add-whitelist', defaultMessage: 'Whitelist' },
+  removeWhitelist: { id: 'label.remove-whitelist', defaultMessage: 'Unwhitelist' },
   property: { id: 'label.property', defaultMessage: 'Property' },
   today: { id: 'label.today', defaultMessage: 'Today' },
   lastHours: { id: 'label.last-hours', defaultMessage: 'Last {x} hours' },
