@@ -53,6 +53,13 @@ export function WebsiteEditForm({ websiteId, onSave }: { websiteId: string; onSa
       >
         <TextField />
       </FormField>
+      <FormField
+        label={formatMessage(labels.ignoreIps)}
+        data-test="input-ignore-ips"
+        name="ignoreIps"
+      >
+        <TextField />
+      </FormField>
       <FormField label={formatMessage(labels.mapType)} name="mapType">
         <Select defaultValue={website?.mapType || MAP_TYPES.world}>
           <ListItem id={MAP_TYPES.world}>{formatMessage(labels.worldMap)}</ListItem>

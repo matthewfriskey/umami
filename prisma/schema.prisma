@@ -67,6 +67,7 @@ model Website {
   id        String    @id @unique @map("website_id") @db.Uuid
   name      String    @db.VarChar(100)
   domain    String?   @db.VarChar(500)
+  ignoreIps String?   @map("ignore_ips") @db.VarChar(1000)
   mapType   String    @default("world") @map("map_type") @db.VarChar(16)
   shareId   String?   @unique @map("share_id") @db.VarChar(50)
   resetAt   DateTime? @map("reset_at") @db.Timestamptz(6)

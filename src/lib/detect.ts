@@ -121,14 +121,14 @@ export async function getClientInfo(request: Request, payload: Record<string, an
   return { userAgent, browser, os, ip, country, region, city, device };
 }
 
-export function hasBlockedIp(clientIp: string) {
-  const ignoreIps = process.env.IGNORE_IP;
+export function hasBlockedIp(clientIp: string, ignoreIps?: string) {
+  const blocklist = ignoreIps || process.env.IGNORE_IP;
 
-  if (ignoreIps) {
+  if (blocklist) {
     const ips = [];
 
-    if (ignoreIps) {
-      ips.push(...ignoreIps.split(',').map(n => n.trim()));
+    if (blocklist) {
+      ips.push(...blocklist.split(',').map(n => n.trim()));
     }
 
     return ips.find(ip => {
