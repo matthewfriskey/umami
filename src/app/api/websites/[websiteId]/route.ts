@@ -35,6 +35,8 @@ export async function POST(
     domain: z.string().optional(),
     shareId: z.string().regex(SHARE_ID_REGEX).nullable().optional(),
     mapType: z.enum([MAP_TYPES.world, MAP_TYPES.usa]).optional(),
+    ignoreIps: z.string().max(1000).optional(),
+    ignoreDistinctIds: z.string().max(4000).optional(),
   });
 
   const { auth, body, error } = await parseRequest(request, schema);
@@ -44,14 +46,21 @@ export async function POST(
   }
 
   const { websiteId } = await params;
-  const { name, domain, shareId, mapType } = body;
+  const { name, domain, shareId, mapType, ignoreIps, ignoreDistinctIds } = body;
 
   if (!(await canUpdateWebsite(auth, websiteId))) {
     return unauthorized();
   }
 
   try {
-    const website = await updateWebsite(websiteId, { name, domain, shareId, mapType });
+    const website = await updateWebsite(websiteId, {
+      name,
+      domain,
+      shareId,
+      mapType,
+      ignoreIps,
+      ignoreDistinctIds,
+    });
 
     return Response.json(website);
   } catch (e: any) {
