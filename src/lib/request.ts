@@ -80,6 +80,16 @@ export function getRequestFilters(query: Record<string, any>) {
   return result;
 }
 
+export async function setWebsiteDate(websiteId: string, data: Record<string, any>) {
+  const website = await fetchWebsite(websiteId);
+
+  if (website?.resetAt && data?.startDate) {
+    data.startDate = maxDate(new Date(data.startDate), new Date(website.resetAt));
+  }
+
+  return data;
+}
+
 export async function getQueryFilters(
   params: Record<string, any>,
   websiteId?: string,
