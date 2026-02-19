@@ -13,8 +13,8 @@ import {
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
 import { MAP_TYPES } from '@/lib/constants';
 
-function getDistinctIds(value: string = '') {
-  return value
+function getDistinctIds(value?: string | null) {
+  return (value || '')
     .split(',')
     .map(n => n.trim())
     .filter(Boolean);
