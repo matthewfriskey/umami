@@ -54,6 +54,7 @@ export const labels = defineMessages({
   action: { id: 'label.action', defaultMessage: 'Action' },
   actions: { id: 'label.actions', defaultMessage: 'Actions' },
   domain: { id: 'label.domain', defaultMessage: 'Domain' },
+  ignoreIps: { id: 'label.ignore-ips', defaultMessage: 'Ignore IP addresses' },
   websiteId: { id: 'label.website-id', defaultMessage: 'Website ID' },
   resetWebsite: { id: 'label.reset-website', defaultMessage: 'Reset website' },
   deleteWebsite: { id: 'label.delete-website', defaultMessage: 'Delete website' },

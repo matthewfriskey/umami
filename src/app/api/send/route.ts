@@ -89,6 +89,7 @@ export async function POST(request: Request) {
 
     // Cache check
     let cache: Cache | null = null;
+    let ignoreIps: string | undefined;
 
     if (websiteId) {
       const cacheHeader = request.headers.get('x-umami-cache');
@@ -102,13 +103,13 @@ export async function POST(request: Request) {
       }
 
       // Find website
-      if (!cache?.websiteId) {
-        const website = await fetchWebsite(websiteId);
+      const website = await fetchWebsite(websiteId);
 
-        if (!website) {
-          return badRequest({ message: 'Website not found.' });
-        }
+      if (!website) {
+        return badRequest({ message: 'Website not found.' });
       }
+
+      ignoreIps = website.ignoreIps;
     }
 
     // Client info
@@ -123,7 +124,7 @@ export async function POST(request: Request) {
     }
 
     // IP block
-    if (hasBlockedIp(ip)) {
+    if (hasBlockedIp(ip, ignoreIps)) {
       return forbidden();
     }
 
