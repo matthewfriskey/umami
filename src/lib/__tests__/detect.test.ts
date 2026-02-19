@@ -1,3 +1,4 @@
+import { hasBlockedIp } from '../detect';
 import { getIpAddress } from '../ip';
 
 const IP = '127.0.0.1';
@@ -19,4 +20,12 @@ test('getIpAddress: Standard header', () => {
 
 test('getIpAddress: No header', () => {
   expect(getIpAddress(new Headers())).toEqual(null);
+});
+
+test('hasBlockedIp: website ignore list supports multiple entries', () => {
+  expect(hasBlockedIp(IP, `${BAD_IP}, ${IP}`)).toEqual(IP);
+});
+
+test('hasBlockedIp: website ignore list supports CIDR', () => {
+  expect(hasBlockedIp(IP, '127.0.0.0/24')).toEqual('127.0.0.0/24');
 });

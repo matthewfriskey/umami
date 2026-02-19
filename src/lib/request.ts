@@ -83,8 +83,8 @@ export function getRequestFilters(query: Record<string, any>) {
 export async function setWebsiteDate(websiteId: string, data: Record<string, any>) {
   const website = await fetchWebsite(websiteId);
 
-  if (website?.resetAt) {
-    data.startDate = maxDate(data.startDate, new Date(website?.resetAt));
+  if (website?.resetAt && data?.startDate) {
+    data.startDate = maxDate(new Date(data.startDate), new Date(website.resetAt));
   }
 
   return data;
@@ -98,7 +98,20 @@ export async function getQueryFilters(
   const filters = getRequestFilters(params);
 
   if (websiteId) {
-    await setWebsiteDate(websiteId, dateRange);
+    const website = await fetchWebsite(websiteId);
+
+    if (website?.resetAt) {
+      dateRange.startDate = maxDate(dateRange.startDate, new Date(website.resetAt));
+    }
+
+    const ignoredDistinctIds = website?.ignoreDistinctIds
+      ?.split(',')
+      ?.map(n => n.trim())
+      ?.filter(Boolean);
+
+    if (ignoredDistinctIds?.length) {
+      filters.ignoredDistinctIds = ignoredDistinctIds;
+    }
 
     if (params.segment) {
       const segmentParams = (await getWebsiteSegment(websiteId, params.segment))
