@@ -6,7 +6,7 @@ import { fetchWebsite } from '@/lib/load';
 import { filtersArrayToObject } from '@/lib/params';
 import { badRequest, unauthorized } from '@/lib/response';
 import type { QueryFilters } from '@/lib/types';
-import { getWebsiteSegment } from '@/queries/prisma';
+import { getWebsiteIgnoredSessionIds, getWebsiteSegment } from '@/queries/prisma';
 
 export async function parseRequest(
   request: Request,
@@ -113,10 +113,7 @@ export async function getQueryFilters(
       filters.ignoredDistinctIds = ignoredDistinctIds;
     }
 
-    const ignoredSessionIds = website?.ignoreSessionIds
-      ?.split(',')
-      ?.map(n => n.trim())
-      ?.filter(Boolean);
+    const ignoredSessionIds = await getWebsiteIgnoredSessionIds(websiteId);
 
     if (ignoredSessionIds?.length) {
       filters.ignoredSessionIds = ignoredSessionIds;

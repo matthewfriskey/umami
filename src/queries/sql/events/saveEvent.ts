@@ -62,6 +62,25 @@ export async function saveEvent(args: SaveEventArgs) {
   });
 }
 
+function getRevenueData(eventData?: Record<string, any>) {
+  const revenue = Number(eventData?.revenue);
+
+  if (!Number.isFinite(revenue) || revenue <= 0) {
+    return { eventData, revenue: null, currency: null };
+  }
+
+  const defaultCurrency = (process.env.DEFAULT_REVENUE_CURRENCY || 'USD').trim().toUpperCase();
+  const rawCurrency =
+    typeof eventData?.currency === 'string' ? eventData.currency.trim().toUpperCase() : '';
+  const currency = rawCurrency || defaultCurrency;
+
+  return {
+    eventData: rawCurrency ? eventData : { ...eventData, currency },
+    revenue,
+    currency,
+  };
+}
+
 async function relationalQuery({
   websiteId,
   sessionId,
@@ -124,26 +143,26 @@ async function relationalQuery({
   });
 
   if (eventData) {
+    const revenueData = getRevenueData(eventData);
+
     await saveEventData({
       websiteId,
       sessionId,
       eventId: websiteEventId,
       urlPath: urlPath?.substring(0, URL_LENGTH),
       eventName: eventName?.substring(0, EVENT_NAME_LENGTH),
-      eventData,
+      eventData: revenueData.eventData,
       createdAt,
     });
 
-    const { revenue, currency } = eventData;
-
-    if (revenue > 0 && currency) {
+    if (revenueData.revenue && revenueData.currency) {
       await saveRevenue({
         websiteId,
         sessionId,
         eventId: websiteEventId,
         eventName: eventName?.substring(0, EVENT_NAME_LENGTH),
-        currency,
-        revenue,
+        currency: revenueData.currency,
+        revenue: revenueData.revenue,
         createdAt,
       });
     }
@@ -236,13 +255,15 @@ async function clickhouseQuery({
   }
 
   if (eventData) {
+    const revenueData = getRevenueData(eventData);
+
     await saveEventData({
       websiteId,
       sessionId,
       eventId,
       urlPath: urlPath?.substring(0, URL_LENGTH),
       eventName: eventName?.substring(0, EVENT_NAME_LENGTH),
-      eventData,
+      eventData: revenueData.eventData,
       createdAt,
     });
   }

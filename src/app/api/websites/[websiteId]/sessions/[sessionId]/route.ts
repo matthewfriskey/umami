@@ -1,6 +1,8 @@
+import { z } from 'zod';
 import { parseRequest } from '@/lib/request';
-import { json, unauthorized } from '@/lib/response';
-import { canViewWebsite } from '@/permissions';
+import { json, notFound, unauthorized } from '@/lib/response';
+import { canUpdateWebsite, canViewWebsite } from '@/permissions';
+import { getWebsiteSessionMeta, updateWebsiteSessionIgnored } from '@/queries/prisma';
 import { getWebsiteSession } from '@/queries/sql';
 
 export async function GET(
@@ -20,6 +22,43 @@ export async function GET(
   }
 
   const data = await getWebsiteSession(websiteId, sessionId);
+  if (!data) {
+    return notFound();
+  }
 
-  return json(data);
+  const sessionMeta = await getWebsiteSessionMeta(websiteId, sessionId);
+
+  return json({
+    ...data,
+    isIgnored: sessionMeta?.isIgnored ?? false,
+  });
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ websiteId: string; sessionId: string }> },
+) {
+  const schema = z.object({
+    isIgnored: z.boolean(),
+  });
+
+  const { auth, body, error } = await parseRequest(request, schema);
+
+  if (error) {
+    return error();
+  }
+
+  const { websiteId, sessionId } = await params;
+
+  if (!(await canUpdateWebsite(auth, websiteId))) {
+    return unauthorized();
+  }
+
+  const result = await updateWebsiteSessionIgnored(websiteId, sessionId, body.isIgnored);
+
+  if (!result.count) {
+    return notFound();
+  }
+
+  return json({ ok: true });
 }

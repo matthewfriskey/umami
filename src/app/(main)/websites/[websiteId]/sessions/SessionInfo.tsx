@@ -8,21 +8,15 @@ import {
   useMessages,
   useRegionNames,
   useUpdateQuery,
-  useWebsite,
 } from '@/components/hooks';
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
 import { MAP_TYPES } from '@/lib/constants';
 
-function getIds(value?: string | null) {
-  return (value || '')
-    .split(',')
-    .map(n => n.trim())
-    .filter(Boolean);
-}
-
 export function SessionInfo({ data, websiteId }: { data: any; websiteId: string }) {
-  const website = useWebsite();
-  const { mutateAsync, isPending, touch, toast } = useUpdateQuery(`/websites/${websiteId}`);
+  const sessionId = data?.id;
+  const { mutateAsync, isPending, touch, toast } = useUpdateQuery(
+    `/websites/${websiteId}/sessions/${sessionId}`,
+  );
   const { formatMessage, labels, messages } = useMessages();
   const { formatCity, formatValue } = useFormat();
   const { getRegionName, regionNames } = useRegionNames();
@@ -35,22 +29,15 @@ export function SessionInfo({ data, websiteId }: { data: any; websiteId: string 
     : null;
   const stateName = regionCode ? regionNames[regionCode] : null;
   const showState = mapType === MAP_TYPES.usa && data?.country === 'US' && !!stateName;
-  const sessionId = data?.id;
-  const ignoredSessionIds = getIds(website?.ignoreSessionIds);
-  const isWhitelisted = sessionId && ignoredSessionIds.includes(sessionId);
+  const isWhitelisted = Boolean(data?.isIgnored);
 
   const handleToggleWhitelist = async () => {
     if (!sessionId) return;
 
-    const next = isWhitelisted
-      ? ignoredSessionIds.filter(id => id !== sessionId)
-      : [...ignoredSessionIds, sessionId];
-
     await mutateAsync(
-      { ignoreSessionIds: next.join(', ') },
+      { isIgnored: !isWhitelisted },
       {
         onSuccess: () => {
-          touch(`website:${websiteId}`);
           touch('sessions');
           toast(formatMessage(messages.saved));
         },

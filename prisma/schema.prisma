@@ -43,6 +43,7 @@ model Session {
   region     String?   @db.VarChar(20)
   city       String?   @db.VarChar(50)
   distinctId String?   @map("distinct_id") @db.VarChar(50)
+  isIgnored  Boolean   @default(false) @map("is_ignored")
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
 
   websiteEvents WebsiteEvent[]
@@ -60,6 +61,7 @@ model Session {
   @@index([websiteId, createdAt, country])
   @@index([websiteId, createdAt, region])
   @@index([websiteId, createdAt, city])
+  @@index([websiteId, isIgnored])
   @@map("session")
 }
 
@@ -69,7 +71,6 @@ model Website {
   domain           String?   @db.VarChar(500)
   ignoreIps        String?   @map("ignore_ips") @db.VarChar(1000)
   ignoreDistinctIds String?  @map("ignore_distinct_ids") @db.VarChar(4000)
-  ignoreSessionIds String?   @map("ignore_session_ids") @db.VarChar(4000)
   mapType          String    @default("world") @map("map_type") @db.VarChar(16)
   shareId   String?   @unique @map("share_id") @db.VarChar(50)
   resetAt   DateTime? @map("reset_at") @db.Timestamptz(6)
