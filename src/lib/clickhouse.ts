@@ -156,6 +156,31 @@ function getIgnoredDistinctIdsParams(filters: Record<string, any>) {
   }, {});
 }
 
+function getIgnoredSessionIdsQuery(filters: Record<string, any>) {
+  const values = filters?.ignoredSessionIds as string[];
+
+  if (!values?.length) {
+    return '';
+  }
+
+  const params = values.map((_, i) => `{ignoredSessionId${i}:UUID}`).join(', ');
+
+  return `and website_event.session_id not in (${params})`;
+}
+
+function getIgnoredSessionIdsParams(filters: Record<string, any>) {
+  const values = filters?.ignoredSessionIds as string[];
+
+  if (!values?.length) {
+    return {};
+  }
+
+  return values.reduce((obj, value, i) => {
+    obj[`ignoredSessionId${i}`] = value;
+    return obj;
+  }, {});
+}
+
 function getDateQuery(filters: Record<string, any>) {
   const { startDate, endDate, timezone } = filters;
 
@@ -194,13 +219,18 @@ function parseFilters(filters: Record<string, any>, options?: QueryOptions) {
     Object.entries(filters).filter(([key]) => key.startsWith('cohort_')),
   );
   const ignoredDistinctIdsQuery = getIgnoredDistinctIdsQuery(filters);
+  const ignoredSessionIdsQuery = getIgnoredSessionIdsQuery(filters);
 
   return {
-    filterQuery: [getFilterQuery(filters, options), ignoredDistinctIdsQuery]
+    filterQuery: [getFilterQuery(filters, options), ignoredDistinctIdsQuery, ignoredSessionIdsQuery]
       .filter(Boolean)
       .join('\n'),
     dateQuery: getDateQuery(filters),
-    queryParams: { ...getQueryParams(filters), ...getIgnoredDistinctIdsParams(filters) },
+    queryParams: {
+      ...getQueryParams(filters),
+      ...getIgnoredDistinctIdsParams(filters),
+      ...getIgnoredSessionIdsParams(filters),
+    },
     cohortQuery: getCohortQuery(cohortFilters),
   };
 }

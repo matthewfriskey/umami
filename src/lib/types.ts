@@ -91,6 +91,7 @@ export interface FilterParams {
   cohort?: string;
   compare?: string;
   ignoredDistinctIds?: string[];
+  ignoredSessionIds?: string[];
 }
 
 export interface SortParams {

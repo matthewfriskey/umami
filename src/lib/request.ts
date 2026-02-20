@@ -113,6 +113,15 @@ export async function getQueryFilters(
       filters.ignoredDistinctIds = ignoredDistinctIds;
     }
 
+    const ignoredSessionIds = website?.ignoreSessionIds
+      ?.split(',')
+      ?.map(n => n.trim())
+      ?.filter(Boolean);
+
+    if (ignoredSessionIds?.length) {
+      filters.ignoredSessionIds = ignoredSessionIds;
+    }
+
     if (params.segment) {
       const segmentParams = (await getWebsiteSegment(websiteId, params.segment))
         ?.parameters as Record<string, any>;

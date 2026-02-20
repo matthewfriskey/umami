@@ -13,7 +13,7 @@ import {
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
 import { MAP_TYPES } from '@/lib/constants';
 
-function getDistinctIds(value?: string | null) {
+function getIds(value?: string | null) {
   return (value || '')
     .split(',')
     .map(n => n.trim())
@@ -35,22 +35,23 @@ export function SessionInfo({ data, websiteId }: { data: any; websiteId: string 
     : null;
   const stateName = regionCode ? regionNames[regionCode] : null;
   const showState = mapType === MAP_TYPES.usa && data?.country === 'US' && !!stateName;
-  const distinctId = data?.distinctId;
-  const ignoredDistinctIds = getDistinctIds(website?.ignoreDistinctIds);
-  const isWhitelisted = distinctId && ignoredDistinctIds.includes(distinctId);
+  const sessionId = data?.id;
+  const ignoredSessionIds = getIds(website?.ignoreSessionIds);
+  const isWhitelisted = sessionId && ignoredSessionIds.includes(sessionId);
 
   const handleToggleWhitelist = async () => {
-    if (!distinctId) return;
+    if (!sessionId) return;
 
     const next = isWhitelisted
-      ? ignoredDistinctIds.filter(id => id !== distinctId)
-      : [...ignoredDistinctIds, distinctId];
+      ? ignoredSessionIds.filter(id => id !== sessionId)
+      : [...ignoredSessionIds, sessionId];
 
     await mutateAsync(
-      { ignoreDistinctIds: next.join(', ') },
+      { ignoreSessionIds: next.join(', ') },
       {
         onSuccess: () => {
           touch(`website:${websiteId}`);
+          touch('sessions');
           toast(formatMessage(messages.saved));
         },
       },
@@ -62,7 +63,7 @@ export function SessionInfo({ data, websiteId }: { data: any; websiteId: string 
       <Info label={formatMessage(labels.distinctId)} icon={<KeyRound />}>
         <Row alignItems="center" gap>
           {data?.distinctId}
-          {distinctId && (
+          {sessionId && (
             <Button
               size="small"
               variant={isWhitelisted ? 'secondary' : 'primary'}
