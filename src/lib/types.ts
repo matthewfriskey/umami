@@ -97,6 +97,7 @@ export interface FilterParams {
   search?: string;
   tag?: string;
   eventType?: number;
+  ignoredSessionIds?: string[];
   segment?: string;
   cohort?: string;
   compare?: string;

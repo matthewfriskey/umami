@@ -1,14 +1,25 @@
-import { Column, Grid, Icon, Label, Row } from '@umami/react-zen';
+import { Button, Column, Grid, Icon, Label, Row } from '@umami/react-zen';
 import type { ReactNode } from 'react';
 import { DateDistance } from '@/components/common/DateDistance';
 import { TypeIcon } from '@/components/common/TypeIcon';
-import { useFormat, useLocale, useMapType, useMessages, useRegionNames } from '@/components/hooks';
+import {
+  useFormat,
+  useLocale,
+  useMapType,
+  useMessages,
+  useRegionNames,
+  useUpdateQuery,
+} from '@/components/hooks';
 import { Calendar, KeyRound, Landmark, MapPin } from '@/components/icons';
 import { MAP_TYPES } from '@/lib/constants';
 
-export function SessionInfo({ data }) {
+export function SessionInfo({ data, websiteId }: { data: any; websiteId?: string }) {
   const { locale } = useLocale();
-  const { t, labels } = useMessages();
+  const sessionId = data?.id;
+  const { mutateAsync, isPending, touch, toast } = useUpdateQuery(
+    websiteId && sessionId ? `/websites/${websiteId}/sessions/${sessionId}` : '',
+  );
+  const { t, labels, messages } = useMessages();
   const { formatCity, formatValue } = useFormat();
   const { getRegionName, regionNames } = useRegionNames(locale);
   const mapType = useMapType();
@@ -20,11 +31,40 @@ export function SessionInfo({ data }) {
     : null;
   const stateName = regionCode ? regionNames[regionCode] : null;
   const showState = mapType === MAP_TYPES.usa && data?.country === 'US' && !!stateName;
+  const isIgnored = Boolean(data?.isIgnored);
+
+  const handleToggleIgnored = async () => {
+    if (!websiteId || !sessionId) {
+      return;
+    }
+
+    await mutateAsync(
+      { isIgnored: !isIgnored },
+      {
+        onSuccess: () => {
+          touch('sessions');
+          toast(t(messages.saved));
+        },
+      },
+    );
+  };
 
   return (
     <Grid columns="repeat(auto-fit, minmax(200px, 1fr)" gap>
       <Info label={t(labels.distinctId)} icon={<KeyRound />}>
-        {data?.distinctId}
+        <Row alignItems="center" gap>
+          {data?.distinctId}
+          {websiteId && sessionId ? (
+            <Button
+              size="sm"
+              variant={isIgnored ? 'outline' : 'primary'}
+              onPress={handleToggleIgnored}
+              isDisabled={isPending}
+            >
+              {isIgnored ? t(labels.includeInReports) : t(labels.excludeFromReports)}
+            </Button>
+          ) : null}
+        </Row>
       </Info>
 
       <Info label={t(labels.lastSeen)} icon={<Calendar />}>
@@ -91,7 +131,7 @@ const Info = ({
       <Label>{label}</Label>
       <Row alignItems="center" gap>
         {icon && <Icon>{icon}</Icon>}
-        {children || '—'}
+        {children || '--'}
       </Row>
     </Column>
   );

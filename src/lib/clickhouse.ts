@@ -179,6 +179,28 @@ function getExcludeBounceQuery(filters: Record<string, any>) {
     `;
 }
 
+function getIgnoredSessionIdsQuery(filters: Record<string, any>) {
+  const values = filters?.ignoredSessionIds as string[];
+
+  if (!values?.length) {
+    return '';
+  }
+
+  return `and session_id not in {ignoredSessionIds:Array(UUID)}`;
+}
+
+function getIgnoredSessionIdsParams(filters: Record<string, any>) {
+  const values = filters?.ignoredSessionIds as string[];
+
+  if (!values?.length) {
+    return {};
+  }
+
+  return {
+    ignoredSessionIds: values,
+  };
+}
+
 function getDateQuery(filters: Record<string, any>) {
   const { startDate, endDate, timezone } = filters;
 
@@ -225,11 +247,17 @@ function parseFilters(filters: Record<string, any>, options?: QueryOptions) {
   const cohortFilters = Object.fromEntries(
     Object.entries(filters).filter(([key]) => key.startsWith('cohort_')),
   );
+  const ignoredSessionIdsQuery = getIgnoredSessionIdsQuery(filters);
 
   return {
-    filterQuery: getFilterQuery(filters, options),
+    filterQuery: [getFilterQuery(filters, options), ignoredSessionIdsQuery]
+      .filter(Boolean)
+      .join('\n'),
     dateQuery: getDateQuery(filters),
-    queryParams: getQueryParams(filters),
+    queryParams: {
+      ...getQueryParams(filters),
+      ...getIgnoredSessionIdsParams(filters),
+    },
     cohortQuery: getCohortQuery(cohortFilters),
     excludeBounceQuery: getExcludeBounceQuery(filters),
   };

@@ -104,7 +104,7 @@ export function ReplayPlayback({
             </Row>
           )}
           <ReplayPlayer events={replay.events} />
-          {showSessionInfo && session && <SessionInfo data={session} />}
+          {showSessionInfo && session && <SessionInfo data={session} websiteId={websiteId} />}
         </Column>
       )}
     </LoadingPanel>

@@ -61,7 +61,7 @@ export function SessionProfile({
               </Column>
             </Row>
             <SessionStats data={data} />
-            <SessionInfo data={data} />
+            <SessionInfo data={data} websiteId={websiteId} />
 
             <Tabs>
               <TabList>

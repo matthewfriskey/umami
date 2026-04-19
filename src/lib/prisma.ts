@@ -191,6 +191,34 @@ function getExcludeBounceQuery(filters: Record<string, any>) {
     `;
 }
 
+function getIgnoredSessionIdsQuery(filters: Record<string, any>) {
+  const values = filters?.ignoredSessionIds as string[];
+
+  if (!values?.length) {
+    return '';
+  }
+
+  const params = values.map((_, i) => `{{ignoredSessionId${i}::uuid}}`).join(', ');
+
+  return `and website_event.session_id not in (${params})`;
+}
+
+function getIgnoredSessionIdsParams(filters: Record<string, any>) {
+  const values = filters?.ignoredSessionIds as string[];
+
+  if (!values?.length) {
+    return {};
+  }
+
+  return values.reduce(
+    (obj, value, i) => {
+      obj[`ignoredSessionId${i}`] = value;
+      return obj;
+    },
+    {} as Record<string, string>,
+  );
+}
+
 function getDateQuery(filters: Record<string, any>) {
   const { startDate, endDate } = filters;
 
@@ -234,6 +262,7 @@ function parseFilters(filters: Record<string, any>, options?: QueryOptions) {
     const baseName = key.replace(/\d+$/, '');
     return ['referrer', ...SESSION_COLUMNS].includes(baseName);
   });
+  const ignoredSessionIdsQuery = getIgnoredSessionIdsQuery(filters);
 
   const cohortFilters = Object.fromEntries(
     Object.entries(filters).filter(([key]) => key.startsWith('cohort_')),
@@ -245,8 +274,13 @@ function parseFilters(filters: Record<string, any>, options?: QueryOptions) {
         ? `inner join session on website_event.session_id = session.session_id and website_event.website_id = session.website_id`
         : '',
     dateQuery: getDateQuery(filters),
-    filterQuery: getFilterQuery(filters, options),
-    queryParams: getQueryParams(filters),
+    filterQuery: [getFilterQuery(filters, options), ignoredSessionIdsQuery]
+      .filter(Boolean)
+      .join('\n'),
+    queryParams: {
+      ...getQueryParams(filters),
+      ...getIgnoredSessionIdsParams(filters),
+    },
     cohortQuery: getCohortQuery(cohortFilters),
     excludeBounceQuery: getExcludeBounceQuery(filters),
   };

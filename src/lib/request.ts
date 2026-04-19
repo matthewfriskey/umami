@@ -7,7 +7,7 @@ import { fetchAccount, fetchWebsite } from '@/lib/load';
 import { filtersArrayToObject } from '@/lib/params';
 import { badRequest, unauthorized } from '@/lib/response';
 import type { QueryFilters } from '@/lib/types';
-import { getWebsiteSegment } from '@/queries/prisma';
+import { getWebsiteIgnoredSessionIds, getWebsiteSegment } from '@/queries/prisma';
 
 export async function parseRequest(
   request: Request,
@@ -119,6 +119,12 @@ export async function getQueryFilters(
 
   if (websiteId) {
     await setWebsiteDate(websiteId, dateRange);
+
+    const ignoredSessionIds = await getWebsiteIgnoredSessionIds(websiteId);
+
+    if (ignoredSessionIds?.length) {
+      filters.ignoredSessionIds = ignoredSessionIds;
+    }
 
     if (params.segment) {
       const segmentParams = (await getWebsiteSegment(websiteId, params.segment))

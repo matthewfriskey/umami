@@ -19,6 +19,7 @@ async function relationalQuery(websiteId: string, sessionId: string) {
     select id,
       distinct_id as "distinctId",
       website_id as "websiteId",
+      is_ignored as "isIgnored",
       browser,
       os,
       device,
@@ -38,6 +39,7 @@ async function relationalQuery(websiteId: string, sessionId: string) {
           session.distinct_id,
           website_event.visit_id,
           session.website_id,
+          session.is_ignored,
           session.browser,
           session.os,
           session.device,
@@ -54,8 +56,8 @@ async function relationalQuery(websiteId: string, sessionId: string) {
     join website_event on website_event.session_id = session.session_id
     where session.website_id = {{websiteId::uuid}}
       and session.session_id = {{sessionId::uuid}}
-    group by session.session_id, session.distinct_id, visit_id, session.website_id, session.browser, session.os, session.device, session.screen, session.language, session.country, session.region, session.city) t
-    group by id, distinct_id, website_id, browser, os, device, screen, language, country, region, city;
+    group by session.session_id, session.distinct_id, visit_id, session.website_id, session.is_ignored, session.browser, session.os, session.device, session.screen, session.language, session.country, session.region, session.city) t
+    group by id, distinct_id, website_id, is_ignored, browser, os, device, screen, language, country, region, city;
     `,
     { websiteId, sessionId },
     FUNCTION_NAME,
@@ -70,6 +72,7 @@ async function clickhouseQuery(websiteId: string, sessionId: string) {
     select id,
       websiteId,
       distinctId,
+      cast(0 as Bool) as "isIgnored",
       browser,
       os,
       device,
