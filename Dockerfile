@@ -1,13 +1,23 @@
 ARG NODE_IMAGE_VERSION="22-alpine"
+ARG PNPM_VERSION="10.11.0"
+# Keep in sync with the resolved Prisma versions in pnpm-lock.yaml.
+ARG PRISMA_VERSION="7.6.0"
 
 # Install dependencies only when needed
 FROM node:${NODE_IMAGE_VERSION} AS deps
+ARG PNPM_VERSION
+ARG PRISMA_VERSION
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install -g pnpm@${PNPM_VERSION}
 RUN pnpm install --frozen-lockfile
+# Fail rather than ship a runner that differs from the generated client's toolchain.
+RUN node -e 'for (const name of ["prisma", "@prisma/client", "@prisma/adapter-pg"]) { \
+      const version = require("./node_modules/" + name + "/package.json").version; \
+      if (version !== process.env.PRISMA_VERSION) throw new Error(`${name}@${version} does not match PRISMA_VERSION=${process.env.PRISMA_VERSION}`); \
+    }'
 
 # Rebuild the source code only when needed
 FROM node:${NODE_IMAGE_VERSION} AS builder
@@ -28,7 +38,8 @@ RUN npm run build-docker
 FROM node:${NODE_IMAGE_VERSION} AS runner
 WORKDIR /app
 
-ARG PRISMA_VERSION="7.3.0"
+ARG PNPM_VERSION
+ARG PRISMA_VERSION
 ARG NODE_OPTIONS
 
 ENV NODE_ENV=production
@@ -39,10 +50,12 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN set -x \
     && apk add --no-cache curl \
-    && npm install -g pnpm
+    && npm install -g pnpm@${PNPM_VERSION}
 
-# Script dependencies
-RUN pnpm --allow-build='@prisma/engines,prisma,@prisma/client,@prisma/adapter-pg' add npm-run-all dotenv chalk semver \
+# Load the same selective script approvals before installing runtime dependencies.
+# No source packages are copied yet; target only the root despite the '**' glob.
+COPY pnpm-workspace.yaml ./
+RUN pnpm add --workspace-root npm-run-all dotenv chalk semver \
     prisma@${PRISMA_VERSION} \
     @prisma/client@${PRISMA_VERSION} \
     @prisma/adapter-pg@${PRISMA_VERSION}
