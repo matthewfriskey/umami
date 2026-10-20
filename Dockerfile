@@ -19,6 +19,14 @@ RUN node -e 'for (const name of ["prisma", "@prisma/client", "@prisma/adapter-pg
       if (version !== process.env.PRISMA_VERSION) throw new Error(`${name}@${version} does not match PRISMA_VERSION=${process.env.PRISMA_VERSION}`); \
     }'
 
+# Install the complete, locked runtime tree independently of Next.js tracing.
+FROM node:${NODE_IMAGE_VERSION} AS runtime-deps
+ARG PNPM_VERSION
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN npm install -g pnpm@${PNPM_VERSION}
+RUN pnpm install --prod --frozen-lockfile
+
 # Rebuild the source code only when needed
 FROM node:${NODE_IMAGE_VERSION} AS builder
 WORKDIR /app
@@ -39,7 +47,6 @@ FROM node:${NODE_IMAGE_VERSION} AS runner
 WORKDIR /app
 
 ARG PNPM_VERSION
-ARG PRISMA_VERSION
 ARG NODE_OPTIONS
 
 ENV NODE_ENV=production
@@ -52,14 +59,6 @@ RUN set -x \
     && apk add --no-cache curl \
     && npm install -g pnpm@${PNPM_VERSION}
 
-# Load the same selective script approvals before installing runtime dependencies.
-# No source packages are copied yet; target only the root despite the '**' glob.
-COPY pnpm-workspace.yaml ./
-RUN pnpm add --workspace-root npm-run-all dotenv chalk semver \
-    prisma@${PRISMA_VERSION} \
-    @prisma/client@${PRISMA_VERSION} \
-    @prisma/adapter-pg@${PRISMA_VERSION}
-
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
@@ -71,7 +70,17 @@ COPY --from=builder /app/generated ./generated
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Standalone tracing includes only parts of some packages and does not trace
+# startup scripts. Replace that tree instead of merging different pnpm layouts.
+RUN rm -rf node_modules
+COPY --from=runtime-deps /app/node_modules ./node_modules
+
 USER nextjs
+
+# Check startup imports and the migration CLI without connecting to a database.
+RUN SKIP_DB_CHECK=1 node scripts/check-db.js \
+    && node scripts/update-tracker.js \
+    && DATABASE_URL=postgresql://user:pass@localhost:5432/dummy pnpm exec prisma --version
 
 EXPOSE 3000
 
